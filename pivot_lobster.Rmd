@@ -1,0 +1,125 @@
+---
+title: "pivot_lobsters"
+author: "Jose Lama"
+date: "9/14/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(readxl)
+library(here)
+library(skimr) # install.packages('skimr')
+library(kableExtra) # install.packages('kableExtra')
+```
+
+```{r Read in data}
+lobsters <- read_xlsx(here("data/lobsters2.xlsx"), skip=4)
+```
+
+
+```{r Group by one variable}
+
+lobsters %>%
+  group_by(year)%>%
+  summarize (count_by_year = n())
+
+
+```
+
+
+
+```{r Group by multipe variable}
+
+lobsters %>%
+  group_by(site, year) %>%
+  summarize(count_by_siteyear =  n())
+
+```
+
+
+
+```{r summarize Multiple Variables}
+
+siteyear_summary<-lobsters %>%
+  group_by (site, year) %>%
+  summarize(count_by_siteyear = n(),
+            mean_size_mm = mean (size_mm, na.rm = TRUE),
+            sd_size_mm = sd ( size_mm, na.rm =TRUE))
+
+
+```
+```{r kable formattin}
+
+## make a table with our new variable
+siteyear_summary %>%
+  kable()
+
+```
+
+
+
+"There are `r nrow(lobsters)` total lobsters included in this report."
+
+
+
+```{r activity}
+
+
+siteyear_summary<-lobsters %>%
+  group_by (site, year) %>%
+  summarize(count_by_siteyear = n(),
+            mean_size_mm = mean (size_mm, na.rm = TRUE),
+            sd_size_mm = sd ( size_mm, na.rm =TRUE),
+            median_size_mm = median(size_mm, na.rm = TRUE))
+
+
+```
+
+
+
+```{r activity ggplot}
+
+
+ggplot(data=siteyear_summary,
+       aes(x= year, 
+           y= median_size_mm,
+           color = site)) + geom_line()
+
+```
+
+
+```{r ggsave}
+ggsave(here("data", "lobsters-line.png"))
+```
+
+```{r  dplyr}
+
+lobsters%>%
+  count (site, year)
+
+```
+
+There are `r count(lobsters)` total lobsters included in this summary.
+
+
+```{r mutate}
+lobsters_detailed <-lobsters%>%
+  mutate(size_m=size_mm /1000,
+         millenia = 2000,
+         observe = "Allison Horst")
+
+```
+
+
+
+```{r select}
+
+
+lobsters_detailed %>%
+  select(date, site, size_m)
+
+```
+
